@@ -3,6 +3,7 @@
 'use strict'
 
 const DatGateway = require('.')
+const assert = require('assert')
 const os = require('os')
 const mkdirp = require('mkdirp')
 const pkg = require('./package.json')
@@ -28,6 +29,10 @@ require('yargs')
           default: '~/.dat-gateway',
           normalize: true
         },
+        home: {
+          alias: 'H',
+          description: 'Service to use as home application'
+        },
         max: {
           alias: 'm',
           description: 'Maximum number of archives allowed in the cache.',
@@ -45,9 +50,11 @@ require('yargs')
       })
     },
     handler: function (argv) {
-      const { dir, max, period, port, ttl, redirect } = argv
-      mkdirp.sync(dir) // make sure it exists
-      const gateway = new DatGateway({ dir, max, period, ttl, redirect })
+      const opts = argv
+      assert.ok(opts.home, 'Portal requires a service to provide')
+      mkdirp.sync(opts.dir) // make sure it exists
+
+      const gateway = new DatGateway(opts)
       gateway
         .load()
         .then(() => {

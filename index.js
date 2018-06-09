@@ -5,6 +5,7 @@ const fs = require('fs')
 const http = require('http')
 const hyperdriveHttp = require('hyperdrive-http')
 const path = require('path')
+const proxy = require('http-proxy')
 const Websocket = require('websocket-stream')
 const url = require('url')
 const hexTo32 = require('hex-to-32')
@@ -19,14 +20,14 @@ function log () {
   }
 }
 
-module.exports =
-class DatGateway extends DatLibrarian {
-  constructor ({ dir, dat, max, net, period, ttl }) {
+class DatPortal extends DatLibrarian {
+  constructor ({ dir, dat, home, max, net, period, ttl }) {
     dat = dat || {}
     if (typeof dat.temp === 'undefined') {
       dat.temp = dat.temp || true // store dats in memory only
     }
     super({ dir, dat, net })
+    this.home = home
     this.max = max
     this.ttl = ttl
     this.period = period
@@ -89,16 +90,6 @@ class DatGateway extends DatLibrarian {
     })
   }
 
-  getIndexHtml () {
-    return new Promise((resolve, reject) => {
-      let filePath = path.join(__dirname, 'index.html')
-      fs.readFile(filePath, 'utf-8', (err, html) => {
-        if (err) return reject(err)
-        else return resolve(html)
-      })
-    })
-  }
-
   getWebsocketHandler () {
     return (stream, req) => {
       stream.on('error', function (e) {
@@ -128,8 +119,8 @@ class DatGateway extends DatLibrarian {
   }
 
   getHandler () {
-    return this.getIndexHtml().then((welcome) => {
-      return (req, res) => {
+    return new Promise(resolve => {
+      let handler = (req, res) => {
         res.setHeader('Access-Control-Allow-Origin', '*')
         const start = Date.now()
         let requestURL = `http://${req.headers.host}${req.url}`
@@ -138,18 +129,20 @@ class DatGateway extends DatLibrarian {
         let hostnameParts = urlParts.hostname.split('.')
 
         let subdomain = hostnameParts[0]
+        let path = urlParts.pathname
         let isRedirecting = subdomain.length === BASE_32_KEY_LENGTH
-
         let address = isRedirecting ? hexTo32.decode(subdomain) : pathParts[0]
-        let path = (isRedirecting ? pathParts : pathParts.slice(1)).join('/')
 
         log('[%s] %s %s', address, req.method, path)
 
         // return index
         if (!isRedirecting && !address) {
-          res.writeHead(200)
-          res.end(welcome)
-          return Promise.resolve()
+          return new Promise((resolve, reject) => {
+            proxy.createProxyServer({target: this.home}).web(req, res, err => {
+              if (err) reject(err)
+              else resolve()
+            })
+          })
         }
 
         // redirect to subdomain
@@ -195,6 +188,7 @@ class DatGateway extends DatLibrarian {
           }
         })
       }
+      resolve(handler)
     })
   }
 
@@ -245,3 +239,5 @@ class DatGateway extends DatLibrarian {
     })
   }
 }
+
+module.exports = DatPortal
