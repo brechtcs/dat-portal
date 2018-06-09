@@ -41,11 +41,6 @@ require('yargs')
           alias: 't',
           description: 'Number of milliseconds before archives expire.',
           default: 10 * 60 * 1000 // ten minutes
-        },
-        redirect: {
-          alias: 'r',
-          description: 'Whether to use subdomain redirects',
-          default: false
         }
       })
     },

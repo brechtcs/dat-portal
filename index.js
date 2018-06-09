@@ -21,13 +21,12 @@ function log () {
 
 module.exports =
 class DatGateway extends DatLibrarian {
-  constructor ({ dir, dat, max, net, period, ttl, redirect }) {
+  constructor ({ dir, dat, max, net, period, ttl }) {
     dat = dat || {}
     if (typeof dat.temp === 'undefined') {
       dat.temp = dat.temp || true // store dats in memory only
     }
     super({ dir, dat, net })
-    this.redirect = redirect
     this.max = max
     this.ttl = ttl
     this.period = period
@@ -133,14 +132,13 @@ class DatGateway extends DatLibrarian {
       return (req, res) => {
         res.setHeader('Access-Control-Allow-Origin', '*')
         const start = Date.now()
-        // TODO redirect /:key to /:key/
         let requestURL = `http://${req.headers.host}${req.url}`
         let urlParts = url.parse(requestURL)
         let pathParts = urlParts.pathname.split('/').slice(1)
         let hostnameParts = urlParts.hostname.split('.')
 
         let subdomain = hostnameParts[0]
-        let isRedirecting = this.redirect && (subdomain.length === BASE_32_KEY_LENGTH)
+        let isRedirecting = subdomain.length === BASE_32_KEY_LENGTH
 
         let address = isRedirecting ? hexTo32.decode(subdomain) : pathParts[0]
         let path = (isRedirecting ? pathParts : pathParts.slice(1)).join('/')
@@ -155,7 +153,7 @@ class DatGateway extends DatLibrarian {
         }
 
         // redirect to subdomain
-        if (!isRedirecting && this.redirect) {
+        if (!isRedirecting) {
           return DatLibrarian.resolve(address).then((resolvedAddress) => {
             // TODO: Detect DatDNS addresses
             let encodedAddress = hexTo32.encode(resolvedAddress)
