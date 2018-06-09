@@ -58,10 +58,10 @@ require('yargs')
       gateway
         .load()
         .then(() => {
-          return gateway.listen(port)
+          return gateway.listen(opts.port)
         })
         .then(function () {
-          console.log('[dat-gateway] Now listening on port ' + port)
+          console.log('[dat-gateway] Now listening on port ' + opts.port)
         })
         .catch(console.error)
     }

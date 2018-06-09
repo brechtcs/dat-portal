@@ -9,12 +9,12 @@ If you want a browser that can visit Dat archives, check out [Beaker](https://be
 To get the `dat-portal` command for running your own gateway, use [npm](https://www.npmjs.com/):
 
 ```
-npm i -g dat-portal
+npm install -g dat-portal
 ```
 
 ## Usage
 
-You can run `dat-portal` to start a gateway server that listens on port 3000. You can also configure it! You can print usage information with `dat-portal -h`:
+Run `dat-portal` to start a gateway server that listens on port 3000. You can also configure it! Print usage information with `dat-portal -h`:
 
 ```
 $ dat-portal -h
@@ -34,28 +34,9 @@ Options:
   -h, --help      Show help                                            [boolean]
 ```
 
-Due to limitations in how URLs work, the dat key will be converted to it's base32 representation instead of hexadecimal using [this library](https://github.com/RangerMauve/hex-to-32)
+Visit `http://${datKey-base32}.localhost` to view any dat available on the network. The key has to be converted to its [base32](https://en.wikipedia.org/wiki/Base32) representation because the maximum length of a DNS subdomain is 63 characters. The standard hexadecimal dat keys are 64 characters long.
 
 The gateway will peer archives until they expire from the cache, at which point it proactively halts them and deletes them from disk.
-
-The gateway also supports replicating a hyperdrive instance using [websockets](https://github.com/maxogden/websocket-stream)
-
-```javascript
-const Websocket = require('websocket-stream')
-const hyperdrive = require('hyperdrive')
-
-const key = 'c33bc8d7c32a6e905905efdbf21efea9ff23b00d1c3ee9aea80092eaba6c4957'
-const url = `ws://localhost:3000/${key}`
-
-const archive = hyperdrive('./somewhere', key)
-
-archive.once('ready', () => {
-  const socket = websocket(url)
-
-  // Replicate through the socket
-  socket.pipe(archive.replicate()).pipe(socket)
-})
-```
 
 
 ## License

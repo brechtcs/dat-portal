@@ -1,10 +1,8 @@
 'use strict'
 
 const DatLibrarian = require('dat-librarian')
-const fs = require('fs')
 const http = require('http')
 const hyperdriveHttp = require('hyperdrive-http')
-const path = require('path')
 const proxy = require('http-proxy')
 const Websocket = require('websocket-stream')
 const url = require('url')

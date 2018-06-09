@@ -6,7 +6,7 @@
   "bin": "bin.js",
   "scripts": {
     "start": "bin.js",
-    "test": "standard && dependency-check . --unused --no-dev && mocha"
+    "test": "standard && dependency-check . --unused --no-dev"
   },
   "dependencies": {
     "dat-librarian": "^1.1.2-alpha",
@@ -17,18 +17,7 @@
     "yargs": "^11.0.0"
   },
   "devDependencies": {
-    "axios": "^0.18.0",
-    "delay": "^2.0.0",
     "dependency-check": "^2.9.1",
-    "eslint": "^4.19.1",
-    "eslint-config-standard": "^11.0.0",
-    "eslint-plugin-import": "^2.12.0",
-    "eslint-plugin-node": "^6.0.1",
-    "eslint-plugin-promise": "^3.7.0",
-    "eslint-plugin-standard": "^3.1.0",
-    "mocha": "^5.0.0",
-    "random-access-memory": "^2.4.0",
-    "rimraf": "^2.6.2",
     "standard": "^10.0.3"
   },
   "repository": {
@@ -37,12 +26,14 @@
   },
   "keywords": [
     "dat",
+    "portal",
     "http",
     "https"
   ],
   "authors": [
     "Paul Frazee <pfrazee@gmail.com>",
-    "Diana Thayer <garbados@gmail.com>"
+    "Diana Thayer <garbados@gmail.com>",
+    "Brecht Savelkoul <brecht.savelkoul@gmail.com>"
   ],
   "license": "Apache-2.0"
 }
