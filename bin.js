@@ -4,7 +4,9 @@
 
 const DatGateway = require('.')
 const assert = require('assert')
+const fs = require('fs')
 const os = require('os')
+const path = require('path')
 const mkdirp = require('mkdirp')
 const pkg = require('./package.json')
 
@@ -20,12 +22,16 @@ require('yargs')
           description: 'Port for the gateway to listen on.',
           default: 3000
         },
+        config: {
+          alias: 'c',
+          description: 'Path to the config file',
+          coerce: resolveHomedir,
+          normalize: true
+        },
         dir: {
           alias: 'd',
           description: 'Directory to use as a cache.',
-          coerce: function (value) {
-            return value.replace('~', os.homedir())
-          },
+          coerce: resolveHomedir,
           default: '~/.dat-gateway',
           normalize: true
         },
@@ -50,8 +56,9 @@ require('yargs')
       })
     },
     handler: function (argv) {
-      const opts = argv
-      assert.ok(opts.home, 'Portal requires a service to provide')
+      const config = readConfig(argv.config)
+      const opts = Object.assign(config, argv)
+      assert.ok(opts.home, 'Portal requires a service to provide homepage')
       mkdirp.sync(opts.dir) // make sure it exists
 
       const gateway = new DatGateway(opts)
@@ -69,3 +76,14 @@ require('yargs')
   .alias('h', 'help')
   .config()
   .parse()
+
+function readConfig (path) {
+  if (!path) {
+    return {}
+  }
+  return require(path)
+}
+
+function resolveHomedir (value) {
+  return path.resolve(value.replace('~', os.homedir()))
+}
